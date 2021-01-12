@@ -161,15 +161,15 @@ class ClientControllerTest {
 
     @Test
     void whenGetAllClientsReturnsListOfClients() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
-
-        when(clientService.getAllClient()).thenReturn(List.of(clientRequest));
-        mockMvc.perform(get("/clients")
-                .characterEncoding("utf-8")
-                .contentType(MediaType.APPLICATION_JSON)
-        ).andDo(print()).andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isArray())
-                .andReturn();
+//        ClientRequest clientRequest = getCompleteClient();
+//
+//        when(clientService.getAllClient()).thenReturn(List.of(clientRequest));
+//        mockMvc.perform(get("/clients")
+//                .characterEncoding("utf-8")
+//                .contentType(MediaType.APPLICATION_JSON)
+//        ).andDo(print()).andExpect(status().isOk())
+//                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isArray())
+//                .andReturn();
 //        when(clientService.addClient(clientRequest)).thenReturn(clientRequest);
 
 //        this.mockMvc.perform(post("/clients")
