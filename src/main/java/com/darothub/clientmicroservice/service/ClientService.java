@@ -10,8 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +24,7 @@ import java.util.stream.Collectors;
 @Primary
 @Service
 @Slf4j
-public class ClientService implements ClientServices {
+public class ClientService implements ClientServices, UserDetailsService {
 
     private final ClientRepository clientRepository;
     private final ModelMapper modelMapper = new ModelMapper();
@@ -61,9 +66,17 @@ public class ClientService implements ClientServices {
                 .collect(Collectors.toList());
     }
 
-    public ClientRequest greet() {
-        return new ClientRequest();
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        try {
+            Optional<Client> client = Optional.of(clientRepository.findByUsername(username));
+            Client getClient = client.get();
+            return new User(getClient.getUsername(), getClient.getPassword(), new ArrayList<>());
+        } catch (Exception exception) {
+            ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "Invalid username/password");
+            throw new CustomException(error);
+        }
+
     }
-
-
 }

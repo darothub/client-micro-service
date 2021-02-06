@@ -17,4 +17,6 @@ public class ClientRequest {
     private String phoneNumber;
     private String gender;
     private String deliveryAddress;
+    private String username;
+    private String password;
 }

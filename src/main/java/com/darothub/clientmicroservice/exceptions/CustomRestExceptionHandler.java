@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +57,14 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFound(
+            EntityNotFoundException ex) {
+        error.setMessage(NOT_FOUND.toString());
+        error.setStatus(NOT_FOUND.value());
+        error.setError(ex.getLocalizedMessage().replace("com.darothub.clientservice.entity.", ""));
+        return buildResponseEntity(error);
+    }
+    @ExceptionHandler(AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDenied(
             EntityNotFoundException ex) {
         error.setMessage(NOT_FOUND.toString());
         error.setStatus(NOT_FOUND.value());

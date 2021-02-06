@@ -27,13 +27,17 @@ public class Client {
     private Long id;
     @NotNull
     @Size(min = 3, max = 46)
-    @NotBlank(message = "First name must not be blank")
     @Pattern(regexp = ConstantUtils.CHAR_PATTERN, message = "Please enter characters only")
     private String firstName;
     @Size(min = 3, max = 46)
-    @NotBlank(message = "Last name is blank")
     @NotNull
     private String lastName;
+    @Size(min = 3, max = 20)
+    @NotNull
+    private String username;
+//    @Pattern(regexp = ConstantUtils.PASSWORD, message = "Password does not match")
+    @NotNull
+    private String password;
     private String thumbnail;
     @Email
     @NotBlank(message = "Email address must not be blank")

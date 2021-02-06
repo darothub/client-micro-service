@@ -24,6 +24,11 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation group: 'org.passay', name: 'passay', version: '1.0'
+
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
 
     implementation 'javax.validation:validation-api:2.0.1.Final'
     implementation 'org.hibernate.validator:hibernate-validator:6.0.13.Final'
@@ -31,6 +36,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.easymock:easymock:4.2'
+    testImplementation 'org.springframework.security:spring-security-test'
 }
 
 test {
