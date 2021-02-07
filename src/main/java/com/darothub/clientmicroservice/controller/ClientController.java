@@ -8,6 +8,7 @@ import com.darothub.clientmicroservice.service.ClientService;
 //import com.darothub.clientmicroservice.utils.JWTUtility;
 import com.darothub.clientmicroservice.utils.JWTUtility;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,23 +35,28 @@ public class ClientController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    ModelMapper modelMapper = new ModelMapper();
+
     public ClientController(ClientService clientService) {
         this.clientService = clientService;
     }
 
     @PostMapping("/clients")
-    public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody ClientRequest clientRequest) {
-        log.info("Inside ClientController add clientRequest"+ clientRequest );
-//        Client client = modelMapper.map(clientRequest, Client.class);
-        try{
-            ClientRequest clientCreated = clientService.addClient(clientRequest);
+    public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody Client client) {
+        log.info("Inside ClientController add clientRequest"+ client );
+        ClientRequest clientCreated = clientService.addClient(client);
 //        log.info("Inside ClientController add clientRequest"+ client );
-            return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
-        }
-        catch (CustomException e){
-            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.toString(), "No resource found");
-            throw new CustomException(error);
-        }
+        return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
+
+//        Client client = modelMapper.map(clientRequest, Client.class);
+//        try{
+//
+//
+//        }
+//        catch (CustomException e){
+//            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.NOT_FOUND.toString(), "No resource found");
+//            throw new CustomException(error);
+//        }
 
 
     }
@@ -116,6 +122,6 @@ public class ClientController {
         successResponse.setMessage(message);
         successResponse.setStatus(status.value());
         successResponse.setPayload(payload);
-        return new ResponseEntity<>(successResponse, status);
+        return ResponseEntity.ok(successResponse);
     }
 }

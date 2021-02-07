@@ -35,13 +35,14 @@ public class ClientService implements ClientServices, UserDetailsService {
 
 
     @Override
-    public <T> T addClient(T t) {
+    public <T> ClientRequest addClient(T t)  {
         log.info("Inside ClientService add client");
         Client client = modelMapper.map(t, Client.class);
         log.info("Inside ClientService add client" + client);
         Client clientCreated = clientRepository.save(client);
 
-        return (T) convertEntityToDto(clientCreated);
+        ClientRequest clientRequest = modelMapper.map(clientCreated, ClientRequest.class);
+        return clientRequest;
     }
 
     @Override

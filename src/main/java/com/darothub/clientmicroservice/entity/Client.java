@@ -7,10 +7,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -26,7 +23,7 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @NotNull
-    @Size(min = 3, max = 46)
+    @NotBlank(message = "First name must not be blank")
     @Pattern(regexp = ConstantUtils.CHAR_PATTERN, message = "Please enter characters only")
     private String firstName;
     @Size(min = 3, max = 46)

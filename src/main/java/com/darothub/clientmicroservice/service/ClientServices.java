@@ -17,7 +17,7 @@ public interface ClientServices {
         return modelMapper.map(clientRequest, Client.class);
     }
 
-    <T> T addClient(T t);
+    <T> ClientRequest addClient(T t) throws Exception;
     ClientRequest getClientById(Long clientId);
     List<ClientRequest> getAllClient();
 }
