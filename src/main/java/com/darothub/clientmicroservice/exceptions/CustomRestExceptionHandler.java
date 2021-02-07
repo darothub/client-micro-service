@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -63,20 +65,13 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         error.setError(ex.getLocalizedMessage().replace("com.darothub.clientservice.entity.", ""));
         return buildResponseEntity(error);
     }
-    @ExceptionHandler(AccessDeniedException.class)
-    protected ResponseEntity<Object> handleAccessDenied(
-            EntityNotFoundException ex) {
-        error.setMessage(NOT_FOUND.toString());
-        error.setStatus(NOT_FOUND.value());
-        error.setError(ex.getLocalizedMessage().replace("com.darothub.clientservice.entity.", ""));
-        return buildResponseEntity(error);
-    }
 
     @ExceptionHandler(CustomException.class)
     protected ResponseEntity<Object> handleCustomException(
             CustomException ce) {
         return buildResponseEntity(ce.getError());
     }
+
 
     @ExceptionHandler({ NoSuchElementException.class })
     public ResponseEntity<Object> handleNoSuchElement(Exception ex) {

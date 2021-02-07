@@ -42,9 +42,16 @@ public class ClientController {
     public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody ClientRequest clientRequest) {
         log.info("Inside ClientController add clientRequest"+ clientRequest );
 //        Client client = modelMapper.map(clientRequest, Client.class);
-        ClientRequest clientCreated = clientService.addClient(clientRequest);
+        try{
+            ClientRequest clientCreated = clientService.addClient(clientRequest);
 //        log.info("Inside ClientController add clientRequest"+ client );
-        return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
+            return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
+        }
+        catch (CustomException e){
+            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.toString(), "No resource found");
+            throw new CustomException(error);
+        }
+
 
     }
 

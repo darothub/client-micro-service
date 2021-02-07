@@ -41,12 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
             token = authorization.substring(7);
             userName = jwtUtility.getUsernameFromToken(token);
         }
-        else{
-            log.info("No authorization");
 
-//            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.toString(), "This is forbidden");
-//            throw new CustomException(error);
-        }
 
         if(null != userName && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails userDetails = clientService.loadUserByUsername(userName);
