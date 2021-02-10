@@ -2,21 +2,28 @@ package com.darothub.clientmicroservice.service;
 
 
 import com.darothub.clientmicroservice.dto.ClientRequest;
+import com.darothub.clientmicroservice.dto.UserDTO;
 import com.darothub.clientmicroservice.entity.Client;
 import com.darothub.clientmicroservice.entity.ErrorResponse;
+import com.darothub.clientmicroservice.entity.SuccessResponse;
 import com.darothub.clientmicroservice.exceptions.CustomException;
 import com.darothub.clientmicroservice.repository.ClientRepository;
+import com.darothub.clientmicroservice.utils.JWTUtility;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Primary;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,21 +36,73 @@ public class ClientService implements ClientServices, UserDetailsService {
     private final ClientRepository clientRepository;
     private final ModelMapper modelMapper = new ModelMapper();
 
+    @Autowired
+    private RestTemplate restTemplate;
+    @Autowired
+    private HttpHeaders headers;
+    @Autowired
+    private JWTUtility jwtUtility;
+
     public ClientService(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
     }
 
 
     @Override
-    public <T> ClientRequest addClient(T t)  {
+    public <T> ClientRequest addClient(T t, String token) {
         log.info("Inside ClientService add client");
         Client client = modelMapper.map(t, Client.class);
         log.info("Inside ClientService add client" + client);
-        Client clientCreated = clientRepository.save(client);
+        int id = jwtUtility.getIdFromToken(token);
 
-        ClientRequest clientRequest = modelMapper.map(clientCreated, ClientRequest.class);
-        return clientRequest;
+        Client oldUser = clientRepository.findByEmailAddress(client.getEmailAddress());
+        if(oldUser != null){
+            ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT.toString(), "User already exists");
+            throw new CustomException(error);
+        }
+        else{
+            log.info("Inside ClientService add client id" + id);
+            client.setUserId(Long.valueOf(id));
+            Client clientCreated = clientRepository.save(client);
+
+            ClientRequest clientRequest = modelMapper.map(clientCreated, ClientRequest.class);
+            return clientRequest;
+        }
+
     }
+//    public UserDetails getUserById(Long id, String token){
+//
+//        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.set("Authorization", "Bearer "+token);
+//
+//        HttpEntity entity = new HttpEntity(headers);
+//
+//        ResponseEntity<SuccessResponse> respEntity = restTemplate.exchange("http://localhost:8082/artisans/"+id, HttpMethod.GET, entity, SuccessResponse.class);
+//
+//        SuccessResponse resp = respEntity.getBody();
+//
+//        Object obj = resp.getPayload();
+//
+//        UserDTO userDTO = modelMapper.map(obj, UserDTO.class);
+//
+//
+//        return new User(userDTO.getEmailAddress(), userDTO.getCountry(), new ArrayList<>());
+//    }
+//
+//    public UserDTO getUserByIds(Long id, String token){
+//        log.info("Id {}", id);
+//        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+//        headers.setContentType(MediaType.APPLICATION_JSON);
+//        headers.set("Authorization", "Bearer "+token);
+//
+//        HttpEntity entity = new HttpEntity(headers);
+//
+//        ResponseEntity<SuccessResponse> respEntity = restTemplate.exchange("http://localhost:8082/artisans/"+id, HttpMethod.GET, entity, SuccessResponse.class);
+//
+//        SuccessResponse resp = respEntity.getBody();
+//        return (UserDTO) resp.getPayload();
+//    }
 
     @Override
     public ClientRequest getClientById(Long clientId) {
@@ -69,13 +128,13 @@ public class ClientService implements ClientServices, UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         try {
-            Optional<Client> client = Optional.of(clientRepository.findByUsername(username));
+            Optional<Client> client = Optional.of(clientRepository.findByEmailAddress(email));
             Client getClient = client.get();
-            return new User(getClient.getUsername(), getClient.getPassword(), new ArrayList<>());
+            return new User(getClient.getUserId().toString(), getClient.getEmailAddress(), new ArrayList<>());
         } catch (Exception exception) {
-            ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "Invalid username/password");
+            ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), exception.getMessage());
             throw new CustomException(error);
         }
 

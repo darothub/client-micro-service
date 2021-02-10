@@ -4,3 +4,4 @@ server:
 jwt:
   header: Authorization
   secret: secretkey123
+

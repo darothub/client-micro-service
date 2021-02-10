@@ -9,5 +9,7 @@ import javax.validation.constraints.Size;
 
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Long> {
-    Client findByUsername(@Size(min = 3, max = 20) String username);
+//    Client findByUsername(@Size(min = 3, max = 20) String username);
+
+    Client findByEmailAddress(String email);
 }

@@ -23,6 +23,8 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @NotNull
+    private Long userId;
+    @NotNull
     @NotBlank(message = "First name must not be blank")
     @Pattern(regexp = ConstantUtils.CHAR_PATTERN, message = "Please enter characters only")
     private String firstName;
@@ -30,12 +32,6 @@ public class Client {
     @NotNull
     private String lastName;
     @Size(min = 3, max = 20)
-    @NotNull
-    private String username;
-//    @Pattern(regexp = ConstantUtils.PASSWORD, message = "Password does not match")
-    @NotNull
-    private String password;
-    private String thumbnail;
     @Email
     @NotBlank(message = "Email address must not be blank")
     @NotNull
@@ -44,5 +40,11 @@ public class Client {
     @Pattern(regexp = ConstantUtils.GENDER_PATTERN, message = "Invalid gender type")
     private String gender;
     private String deliveryAddress;
+    //    @NotNull
+//    private String username;
+    //    @Pattern(regexp = ConstantUtils.PASSWORD, message = "Password does not match")
+//    @NotNull
+//    private String password;
+//    private String thumbnail;
 
 }

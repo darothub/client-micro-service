@@ -1,5 +1,6 @@
 package com.darothub.clientmicroservice.utils;
 
+import com.darothub.clientmicroservice.dto.UserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -25,14 +26,21 @@ public class JWTUtility implements Serializable {
     private String secretKey;
 
     //retrieve username from jwt token
-    public String getUsernameFromToken(String token) {
+    public String getEmailAddressFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
-    //retrieve username from jwt token
+
+    //retrieve password from jwt token
     public String getPasswordFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
         return (String) claims.get("password");
     }
+    //retrieve id from jwt token
+    public int getIdFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return (int) claims.get("id");
+    }
+
     //retrieve expiration date from jwt token
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
@@ -79,8 +87,15 @@ public class JWTUtility implements Serializable {
 
     //validate token
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        final String password = getPasswordFromToken(token);
-        return (username.equals(userDetails.getUsername()) && password.equals(userDetails.getPassword()) && !isTokenExpired(token));
+        final String username = getEmailAddressFromToken(token);
+//        final String password = getPasswordFromToken(token);
+        return (username.equals(userDetails.getUsername())  && !isTokenExpired(token));
+    }
+
+    //validate token
+    public Boolean validateTokenTwo(String token) {
+//        final String email = getEmailAddressFromToken(token);
+//        final String password = getPasswordFromToken(token);
+        return (!isTokenExpired(token));
     }
 }

@@ -27,7 +27,6 @@ class ClientServiceTest {
     private ClientServices clientServices;
 
 
-
     @Test
     void addClient() {
 
@@ -39,21 +38,21 @@ class ClientServiceTest {
     }
 
     @Test
-    void getAllClients(){
+    void getAllClients() {
         addClient();
         List<Client> clientList = fakeClientRepository.findAll();
         assertNotNull(clientList);
     }
 
     @Test
-    void confirmSomeValuesOfEachItem(){
+    void confirmSomeValuesOfEachItem() {
         addClient();
         List<Client> clientList = fakeClientRepository.findAll();
         Client client0 = clientList.get(0);
         Assertions.assertEquals("Darot", client0.getFirstName());
     }
 
-    private ClientRequest getClient(){
+    private ClientRequest getClient() {
         ClientRequest clientRequest = new ClientRequest();
         clientRequest.setFirstName("Darot");
         clientRequest.setLastName("Peacedude");

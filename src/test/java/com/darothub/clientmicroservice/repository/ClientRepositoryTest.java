@@ -22,7 +22,7 @@ class ClientRepositoryTest {
     private ClientRepository clientRepository;
 
     @Test
-    public void testSaveClient(){
+    public void testSaveClient() {
         Client client = getClient();
         Client saved = entityManager.merge(client);
 
@@ -31,7 +31,7 @@ class ClientRepositoryTest {
         assertEquals(getFromRepo, saved);
     }
 
-    private Client getClient(){
+    private Client getClient() {
         Client client = new Client();
         client.setId(1L);
         client.setFirstName("Darot");

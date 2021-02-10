@@ -68,6 +68,7 @@ class ClientControllerTest {
                 .andDo(print()).andExpect(status().isCreated())
                 .andExpect(content().string(containsString("Client added successfully")));
     }
+
     @Test
     void whenGetClientsReturnAnEmptyArrayWhenNoClientAdded() throws Exception {
         ClientRequest clientRequest = getCompleteClient();
@@ -83,6 +84,7 @@ class ClientControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isEmpty())
                 .andReturn();
     }
+
     @Test
     void whenAddClientReturnCreatedStatus() throws Exception {
         ClientRequest clientRequest = getCompleteClient();
@@ -113,6 +115,7 @@ class ClientControllerTest {
                 .andReturn();
 
     }
+
     @Test
     void whenGetClientByIdReturnsClientIfPresent() throws Exception {
         ClientRequest clientRequest = getCompleteClient();
@@ -193,6 +196,7 @@ class ClientControllerTest {
 //                .contentType(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isCreated());
     }
+
     @Test
     public void getAllClient() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/clients")

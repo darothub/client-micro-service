@@ -10,12 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClientRequest {
     private Long id;
+    private Long userId;
     private String firstName;
     private String lastName;
-    private String thumbnail;
+//    private String thumbnail;
     private String emailAddress;
     private String phoneNumber;
     private String gender;
     private String deliveryAddress;
-    private String username;
+//    private String username;
 }

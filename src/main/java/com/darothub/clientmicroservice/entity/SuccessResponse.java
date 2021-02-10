@@ -15,4 +15,6 @@ public class SuccessResponse extends ResponseModel {
     private int status;
     private String message;
     private Object payload;
+    
+
 }

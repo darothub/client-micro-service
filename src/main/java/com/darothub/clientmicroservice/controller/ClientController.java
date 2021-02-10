@@ -4,6 +4,7 @@ package com.darothub.clientmicroservice.controller;
 import com.darothub.clientmicroservice.dto.ClientRequest;
 import com.darothub.clientmicroservice.entity.*;
 import com.darothub.clientmicroservice.exceptions.CustomException;
+import com.darothub.clientmicroservice.filter.JwtFilter;
 import com.darothub.clientmicroservice.service.ClientService;
 //import com.darothub.clientmicroservice.utils.JWTUtility;
 import com.darothub.clientmicroservice.utils.JWTUtility;
@@ -18,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -31,7 +33,10 @@ public class ClientController {
     private SuccessResponse successResponse = new SuccessResponse();
     @Autowired
     private JWTUtility jwtUtility;
-//
+
+    @Autowired
+    private JwtFilter jwtFilter;
+    //
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -42,50 +47,46 @@ public class ClientController {
     }
 
     @PostMapping("/clients")
-    public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody Client client) {
-        log.info("Inside ClientController add clientRequest"+ client );
-        ClientRequest clientCreated = clientService.addClient(client);
-//        log.info("Inside ClientController add clientRequest"+ client );
+    public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody Client client, @RequestHeader("Authorization") String auth) {
+        String token = null;
+        if(auth.startsWith("Bearer") && auth.length() > 7){
+            token = auth.substring(7);
+        }
+        else{
+            ErrorResponse error = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.toString(), "You are not authorized");
+            throw new CustomException(error);
+        }
+
+        log.info("Inside ClientController add clientRequest"+ token );
+        ClientRequest clientCreated = clientService.addClient(client, token);
+
         return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
-
-//        Client client = modelMapper.map(clientRequest, Client.class);
-//        try{
-//
-//
-//        }
-//        catch (CustomException e){
-//            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.NOT_FOUND.toString(), "No resource found");
-//            throw new CustomException(error);
-//        }
-
 
     }
 
-//
+    //
     @PostMapping("/authenticate")
-    public ResponseEntity<ResponseModel> authenticate(@RequestBody JwtRequest jwtRequest) throws Exception{
-        try{
+    public ResponseEntity<ResponseModel> authenticate(@RequestBody JwtRequest jwtRequest) throws Exception {
+        try {
             authenticationManager.authenticate(
 
                     new UsernamePasswordAuthenticationToken(
-                            jwtRequest.getUsername(),
+                            jwtRequest.getEmailAddress(),
                             jwtRequest.getPassword()
                     )
             );
-        }
-        catch (BadCredentialsException e){
+        } catch (BadCredentialsException e) {
             ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "Invalid username/password");
             throw new CustomException(error);
         }
 
         final UserDetails userDetails = clientService.loadUserByUsername(
-                jwtRequest.getUsername());
+                jwtRequest.getEmailAddress());
 
-        if(userDetails.getPassword().equals(jwtRequest.getPassword())){
+        if (userDetails.getPassword().equals(jwtRequest.getPassword())) {
             final String token = jwtUtility.generateToken(userDetails);
             return handleSuccessResponseEntity("Client found", HttpStatus.OK, new JwtResponse(token));
-        }
-        else{
+        } else {
             ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "Invalid username/password");
             throw new CustomException(error);
         }
@@ -118,7 +119,7 @@ public class ClientController {
     }
 
 
-    public ResponseEntity<ResponseModel> handleSuccessResponseEntity(String message, HttpStatus status, Object payload){
+    public ResponseEntity<ResponseModel> handleSuccessResponseEntity(String message, HttpStatus status, Object payload) {
         successResponse.setMessage(message);
         successResponse.setStatus(status.value());
         successResponse.setPayload(payload);

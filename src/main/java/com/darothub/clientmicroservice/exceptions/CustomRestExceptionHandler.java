@@ -46,7 +46,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
 
     }
 
-    @ExceptionHandler({ MethodArgumentTypeMismatchException.class })
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class})
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
         return errorHandlerController(ex, BAD_REQUEST);
@@ -73,7 +73,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
 
-    @ExceptionHandler({ NoSuchElementException.class })
+    @ExceptionHandler({NoSuchElementException.class})
     public ResponseEntity<Object> handleNoSuchElement(Exception ex) {
         return errorHandlerController(ex, NOT_FOUND);
     }
@@ -117,7 +117,7 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         error.setError(errors);
     }
 
-    private ResponseEntity<Object> errorHandlerController(Exception ex, HttpStatus status){
+    private ResponseEntity<Object> errorHandlerController(Exception ex, HttpStatus status) {
         error.setMessage(status.toString());
         error.setStatus(status.value());
         error.setError(ex.getMessage());

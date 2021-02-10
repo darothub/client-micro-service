@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
+public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private ClientService clientService;
@@ -52,11 +52,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
         http.csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/authenticate")
-                .permitAll()
                 .antMatchers(HttpMethod.POST, "/clients")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

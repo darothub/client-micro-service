@@ -31,6 +31,7 @@ public class EntityToDtoUnitTests {
         assertEquals(client.getFirstName(), clientRequest.getFirstName());
 
     }
+
     @Test
     public void whenConvertClientRequestToClientEntity_thenCorrect() {
         ClientRequest clientRequest = new ClientRequest();
