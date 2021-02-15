@@ -39,7 +39,6 @@ class ClientRepositoryTest {
         client.setGender("Male");
         client.setEmailAddress("darot@gmail.com");
         client.setPhoneNumber("08060085192");
-        client.setThumbnail("darot.jpg");
         return client;
     }
 

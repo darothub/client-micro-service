@@ -2,6 +2,7 @@ package com.darothub.clientmicroservice.controller;
 
 
 import com.darothub.clientmicroservice.dto.ClientRequest;
+import com.darothub.clientmicroservice.entity.Client;
 import com.darothub.clientmicroservice.entity.ErrorResponse;
 import com.darothub.clientmicroservice.exceptions.CustomException;
 import com.darothub.clientmicroservice.exceptions.CustomRestExceptionHandler;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,9 +22,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,6 +46,9 @@ class ClientControllerTest {
     private ClientController clientController;
 
     ObjectMapper objectMapper = new ObjectMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
+
+    String TOKEN = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkYXJvdEBnbWFpbC5jb20iLCJpZCI6MSwiZXhwIjowLCJpYXQiOjE2MTM0MDMxNzR9.69uNWQa-MsyA_NmzLyybaMgALoKg37VZX-HAQALrQzqg_GqAsTTpBQSsV35KMU158w9eK982Ag55-MFhVhn6QQ";
 
     @BeforeEach
     public void setup() {
@@ -57,27 +64,34 @@ class ClientControllerTest {
 
     @Test
     void whenAddClientWithCompleteConstraintReturnCreated() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
-
+        Client clientRequest = getCompleteClient();
+        ClientRequest clientDTO = modelMapper.map(clientRequest, ClientRequest.class);
         String json = objectMapper.writeValueAsString(clientRequest);
+
+        when(clientService.addClient(clientRequest, TOKEN)).thenReturn(clientDTO);
         this.mockMvc.perform(post("/clients")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
                 .content(json)
         )
                 .andDo(print()).andExpect(status().isCreated())
                 .andExpect(content().string(containsString("Client added successfully")));
+
+
+
     }
 
     @Test
     void whenGetClientsReturnAnEmptyArrayWhenNoClientAdded() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
+        Client clientRequest = getCompleteClient();
         String json = objectMapper.writeValueAsString(clientRequest);
 
         this.mockMvc.perform(get("/clients")
                 .characterEncoding("utf-8")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
                 .content(json)
         ).andDo(print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -86,29 +100,35 @@ class ClientControllerTest {
     }
 
     @Test
-    void whenAddClientReturnCreatedStatus() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
-        String json = objectMapper.writeValueAsString(clientRequest);
-        when(clientService.addClient(clientRequest)).thenReturn(clientRequest);
+    void whenClientAddedSuccessfullyReturnCreatedStatus() throws Exception {
+        Client client = getCompleteClient();
+        String json = objectMapper.writeValueAsString(client);
+        ClientRequest clientDTO = modelMapper.map(client, ClientRequest.class);
+        when(clientService.addClient(client, TOKEN)).thenReturn(clientDTO);
+
         this.mockMvc.perform(post("/clients")
                 .characterEncoding("utf-8")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
                 .content(json)
         ).andDo(print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").value(clientRequest))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").value(clientDTO))
                 .andReturn();
     }
 
     @Test
     void whenAddClientReturnPayload() throws Exception {
-        ClientRequest clientRequest = getIncompleteClient();
+        Client clientRequest = getCompleteClient();
         String json = objectMapper.writeValueAsString(clientRequest);
-        when(clientService.addClient(clientRequest)).thenReturn(clientRequest);
+        ClientRequest clientDTO = modelMapper.map(clientRequest, ClientRequest.class);
+        when(clientService.addClient(clientRequest, TOKEN)).thenReturn(clientDTO);
+
         mockMvc.perform(post("/clients")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
                 .content(json)
         ).andDo(print()).andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.payload").exists())
@@ -118,10 +138,12 @@ class ClientControllerTest {
 
     @Test
     void whenGetClientByIdReturnsClientIfPresent() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
+        Client clientRequest = getCompleteClient();
         clientRequest.setId(1L);
+        ClientRequest clientDTO = modelMapper.map(clientRequest, ClientRequest.class);
+
         String json = objectMapper.writeValueAsString(clientRequest);
-        when(clientService.getClientById(1L)).thenReturn(clientRequest);
+        when(clientService.getClientById(1L)).thenReturn(clientDTO);
         mockMvc.perform(get("/clients/1")
                 .characterEncoding("utf-8")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -134,7 +156,7 @@ class ClientControllerTest {
 
     @Test
     void whenGetClientByIdThrowsErrorIfNotPresent() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
+        Client clientRequest = getCompleteClient();
         clientRequest.setId(1L);
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND.toString(), "No resource found");
         when(clientService.getClientById(1L)).thenThrow(new CustomException(error));
@@ -149,7 +171,7 @@ class ClientControllerTest {
 
     @Test
     void whenGetClientByIdThrowsErrorNoResourceFoundIfNotPresent() throws Exception {
-        ClientRequest clientRequest = getCompleteClient();
+        Client clientRequest = getCompleteClient();
         clientRequest.setId(1L);
         ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND.toString(), "No resource found");
         when(clientService.getClientById(1L)).thenThrow(new CustomException(error));
@@ -163,18 +185,57 @@ class ClientControllerTest {
     }
 
     @Test
-    void whenGetAllClientsReturnsListOfClients() throws Exception {
-//        ClientRequest clientRequest = getCompleteClient();
-//
-//        when(clientService.getAllClient()).thenReturn(List.of(clientRequest));
-//        mockMvc.perform(get("/clients")
-//                .characterEncoding("utf-8")
-//                .contentType(MediaType.APPLICATION_JSON)
-//        ).andDo(print()).andExpect(status().isOk())
-//                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isArray())
-//                .andReturn();
-//        when(clientService.addClient(clientRequest)).thenReturn(clientRequest);
+    void whenAddingIncompleteClientShouldReturnError() throws Exception {
+        Client client = getIncompleteClient();
+        String json = objectMapper.writeValueAsString(client);
 
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "First name must not be blank");
+        this.mockMvc.perform(post("/clients")
+                .characterEncoding("utf-8")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
+                .content(json)
+        ).andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists())
+                .andReturn();
+
+    }
+
+    @Test
+    void whenAddingClientWithoutFirstNameItShouldReturnError() throws Exception {
+        Client client = getIncompleteClient();
+        String json = objectMapper.writeValueAsString(client);
+
+        ErrorResponse error = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.toString(), "First name must not be blank");
+        this.mockMvc.perform(post("/clients")
+                .characterEncoding("utf-8")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
+                .content(json)
+        ).andDo(print()).andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").hasJsonPath())
+                .andReturn();
+
+    }
+
+    @Test
+    void whenGetAllClientsReturnsListOfClients() throws Exception {
+        Client clientRequest = getCompleteClient();
+        ClientRequest clientDTO = modelMapper.map(clientRequest, ClientRequest.class);
+        when(clientService.getAllClient()).thenReturn(Arrays.asList(clientDTO));
+        mockMvc.perform(get("/clients")
+                .characterEncoding("utf-8")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer "+TOKEN)
+        ).andDo(print()).andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.payload").isArray())
+                .andReturn();
+//        when(clientService.addClient(clientRequest)).thenReturn(clientRequest);
+//
 //        this.mockMvc.perform(post("/clients")
 //                .characterEncoding("utf-8")
 //                .contentType(MediaType.APPLICATION_JSON)
@@ -186,10 +247,10 @@ class ClientControllerTest {
 //                ErrorResponse.class)).hasFieldOrProperty("error");
 //        assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/clients",
 //                ResponseModel.class)).hasFieldOrProperty("status");
-
+//
 //        ResponseEntity<ResponseModel> response = clientController.addClient(clientRequest);
 //        assertNotNull(response);
-
+//
 //        Mockito.when(fakeClientService.addClient(clientRequest)).thenReturn(clientRequest);
 //        String url = "/clients";
 //        mockMvc.perform(MockMvcRequestBuilders.post(url)
@@ -206,30 +267,27 @@ class ClientControllerTest {
 
     }
 
-    @Test
-    void getClientById() {
-    }
 
-    private ClientRequest getCompleteClient() {
-        ClientRequest clientRequest = new ClientRequest();
+    private Client getCompleteClient() {
+        Client clientRequest = new Client();
 
         clientRequest.setFirstName("Peacedude");
         clientRequest.setLastName("Peacedude");
         clientRequest.setGender("Male");
         clientRequest.setEmailAddress("darot@gmail.com");
         clientRequest.setPhoneNumber("08060085192");
-        clientRequest.setThumbnail("darot.jpg");
+
         clientRequest.setDeliveryAddress("Delivery");
         return clientRequest;
     }
 
-    private ClientRequest getIncompleteClient() {
-        ClientRequest clientRequest = new ClientRequest();
+
+    private Client getIncompleteClient() {
+        Client clientRequest = new Client();
         clientRequest.setLastName("Peacedude");
         clientRequest.setGender("Male");
         clientRequest.setEmailAddress("darot@gmail.com");
         clientRequest.setPhoneNumber("08060085192");
-        clientRequest.setThumbnail("darot.jpg");
         clientRequest.setDeliveryAddress("Delivery");
         return clientRequest;
     }

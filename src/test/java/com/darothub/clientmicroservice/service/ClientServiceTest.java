@@ -59,7 +59,6 @@ class ClientServiceTest {
         clientRequest.setGender("Male");
         clientRequest.setEmailAddress("darot@gmail.com");
         clientRequest.setPhoneNumber("08060085192");
-        clientRequest.setThumbnail("darot.jpg");
         return clientRequest;
     }
 

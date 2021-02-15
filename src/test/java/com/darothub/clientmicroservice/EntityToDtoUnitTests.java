@@ -24,8 +24,6 @@ public class EntityToDtoUnitTests {
         client.setGender("Male");
         client.setEmailAddress("darot@gmail.com");
         client.setPhoneNumber("08060085192");
-        client.setThumbnail("darot.jpg");
-
         ClientRequest clientRequest = clientServices.convertEntityToDto(client);
         assertEquals(client.getId(), clientRequest.getId());
         assertEquals(client.getFirstName(), clientRequest.getFirstName());
@@ -41,8 +39,6 @@ public class EntityToDtoUnitTests {
         clientRequest.setGender("Male");
         clientRequest.setEmailAddress("darot@gmail.com");
         clientRequest.setPhoneNumber("08060085192");
-        clientRequest.setThumbnail("darot.jpg");
-
         Client client = clientServices.convertDtoToEntity(clientRequest);
 
         assertEquals(clientRequest.getId(), client.getId());

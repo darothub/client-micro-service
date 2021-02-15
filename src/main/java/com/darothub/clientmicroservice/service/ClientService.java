@@ -57,7 +57,7 @@ public class ClientService implements ClientServices, UserDetailsService {
 
         Client oldUser = clientRepository.findByEmailAddress(client.getEmailAddress());
         if(oldUser != null){
-            ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT.toString(), "User already exists");
+            ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT.toString(), "Client already exists");
             throw new CustomException(error);
         }
         else{

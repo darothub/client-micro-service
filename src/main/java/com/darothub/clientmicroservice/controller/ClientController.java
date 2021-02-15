@@ -51,16 +51,17 @@ public class ClientController {
         String token = null;
         if(auth.startsWith("Bearer") && auth.length() > 7){
             token = auth.substring(7);
+            log.info("Inside ClientController add clientRequest"+ token );
+            ClientRequest clientCreated = clientService.addClient(client, token);
+
+            return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
         }
         else{
             ErrorResponse error = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.toString(), "You are not authorized");
             throw new CustomException(error);
         }
 
-        log.info("Inside ClientController add clientRequest"+ token );
-        ClientRequest clientCreated = clientService.addClient(client, token);
 
-        return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
 
     }
 
@@ -123,6 +124,6 @@ public class ClientController {
         successResponse.setMessage(message);
         successResponse.setStatus(status.value());
         successResponse.setPayload(payload);
-        return ResponseEntity.ok(successResponse);
+        return new ResponseEntity<>(successResponse, status);
     }
 }
