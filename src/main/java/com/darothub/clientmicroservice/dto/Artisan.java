@@ -10,17 +10,13 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO {
+public class Artisan {
     private Long id;
-    @JsonProperty("first_name")
     private String firstName;
-    @JsonProperty("last_name")
     private String lastName;
     private String category;
     private String thumbnail;
-    @JsonProperty("email_address")
     private String emailAddress;
-    @JsonProperty("phone_number")
     private String phoneNumber;
     private String gender;
     private String country;

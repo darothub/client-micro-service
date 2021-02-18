@@ -1,8 +1,6 @@
 package com.darothub.clientmicroservice.filter;
 
-import com.darothub.clientmicroservice.dto.UserDTO;
 import com.darothub.clientmicroservice.entity.ErrorResponse;
-import com.darothub.clientmicroservice.exceptions.CustomException;
 import com.darothub.clientmicroservice.service.ClientService;
 import com.darothub.clientmicroservice.utils.JWTUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,25 +68,25 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 //
 //
-//        if (0 != userId && null != userName && SecurityContextHolder.getContext().getAuthentication() == null) {
-//            log.info("token "+token + "\n" + "userId " + userId);
-//            UserDetails userDetails = clientService.loadUserByUsername(userName);
+        if (0 != userId && null != userName && SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.info("token "+token + "\n" + "userId " + userId);
+//            UserDetails userDetails = clientService.loadUserByUsername(String.valueOf(userId));
 //            UserDetails userDetails = clientService.getUserById(Long.valueOf(userId), token);
-//            UserDTO userDTO = clientService.getUserByIds(Long.valueOf(userId), token);
-//            log.info("UserDTO {}", userDTO);
-//            if (jwtUtility.validateTokenTwo(token)) {
-//                log.info("token is valid");
-//                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-//                        new UsernamePasswordAuthenticationToken(
-//                                userDetails, null, userDetails.getAuthorities()
-//                        );
-//                usernamePasswordAuthenticationToken.setDetails(
-//                        new WebAuthenticationDetailsSource().buildDetails(request)
-//                );
-//                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-//            }
-//
-//        }
+            UserDetails userDetails = clientService.getUserById(Long.valueOf(userId), token);
+            log.info("UserDTO {}", userDetails);
+            if (jwtUtility.validateTokenTwo(token)) {
+                log.info("token is valid");
+                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities()
+                        );
+                usernamePasswordAuthenticationToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+            }
+
+        }
 
 
 

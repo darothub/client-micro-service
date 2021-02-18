@@ -37,6 +37,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.easymock:easymock:4.2'
     testImplementation 'org.springframework.security:spring-security-test'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
+    compileOnly 'com.antkorwin:better-strings:0.4'
+    annotationProcessor 'com.antkorwin:better-strings:0.4'
 }
 
 test {

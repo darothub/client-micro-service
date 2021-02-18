@@ -48,20 +48,8 @@ public class ClientController {
 
     @PostMapping("/clients")
     public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody Client client, @RequestHeader("Authorization") String auth) {
-        String token = null;
-        if(auth.startsWith("Bearer") && auth.length() > 7){
-            token = auth.substring(7);
-            log.info("Inside ClientController add clientRequest"+ token );
-            ClientRequest clientCreated = clientService.addClient(client, token);
-
-            return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
-        }
-        else{
-            ErrorResponse error = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.toString(), "You are not authorized");
-            throw new CustomException(error);
-        }
-
-
+        ClientRequest clientCreated = clientService.addClient(client, auth);
+        return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
 
     }
 

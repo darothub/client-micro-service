@@ -20,12 +20,11 @@ import javax.validation.constraints.Size;
 @EqualsAndHashCode(callSuper = false)
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @NotNull
     private Long userId;
     @NotNull
-    @NotBlank(message = "First name must not be blank")
     @Pattern(regexp = ConstantUtils.CHAR_PATTERN, message = "Please enter characters only")
     private String firstName;
     @Size(min = 3, max = 46)
