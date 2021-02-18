@@ -35,9 +35,10 @@ public class JWTUtility implements Serializable {
         return (String) claims.get("password");
     }
     //retrieve id from jwt token
-    public int getIdFromToken(String token) {
+    public Long getIdFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
-        return (int) claims.get("id");
+        Long id = (long) (int) claims.get("id");
+        return id;
     }
 
     //retrieve expiration date from jwt token

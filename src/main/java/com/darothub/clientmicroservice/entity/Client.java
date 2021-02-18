@@ -20,7 +20,8 @@ import javax.validation.constraints.Size;
 @EqualsAndHashCode(callSuper = false)
 public class Client {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="client_seq")
+    @SequenceGenerator(name = "client_seq", sequenceName = "client_seq", initialValue = 1, allocationSize=1)
     private Long id;
     @NotNull
     private Long userId;

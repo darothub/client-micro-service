@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Example;
 import org.springframework.http.*;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -57,21 +58,29 @@ public class ClientService implements ClientServices, UserDetailsService {
         log.info("Inside ClientService add client" + client);
         String token = null;
 
-        Client oldUser = clientRepository.findByEmailAddress(client.getEmailAddress());
-        if(oldUser != null){
-            ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT.toString(), "Client already exists");
-            throw new CustomException(error);
-        }
         if(auth.startsWith("Bearer") && auth.length() > 7){
             token = auth.substring(7);
             log.info("Inside ClientService add client"+ token );
-            int id = jwtUtility.getIdFromToken(token);
+            Long id = jwtUtility.getIdFromToken(token);
             log.info("Inside ClientService add client id" + id);
-            client.setUserId(Long.valueOf(id));
-            Client clientCreated = clientRepository.save(client);
 
-            ClientRequest clientRequest = modelMapper.map(clientCreated, ClientRequest.class);
-            return clientRequest;
+            List<Client> oldClients = clientRepository.findAllByEmailAddress(client.getEmailAddress())
+                    .stream().filter(c -> c.getUserId() == id)
+                    .collect(Collectors.toList());
+
+
+            log.info("Inside ClientService old clients" + oldClients);
+
+            if(oldClients.isEmpty()){
+                client.setUserId(Long.valueOf(id));
+                Client clientCreated = clientRepository.save(client);
+
+                ClientRequest clientRequest = modelMapper.map(clientCreated, ClientRequest.class);
+                return clientRequest;
+            }
+            ErrorResponse error = new ErrorResponse(HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT.toString(), "Client already exists");
+            throw new CustomException(error);
+
         }
         else{
             ErrorResponse error = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.toString(), "You are not authorized");
@@ -80,26 +89,6 @@ public class ClientService implements ClientServices, UserDetailsService {
 
 
     }
-//    public UserDetails getUserById(Long id, String token){
-//
-//        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        headers.set("Authorization", "Bearer "+token);
-//
-//        HttpEntity entity = new HttpEntity(headers);
-//
-//        ResponseEntity<SuccessResponse> respEntity = restTemplate.exchange("http://localhost:8082/artisans/"+id, HttpMethod.GET, entity, SuccessResponse.class);
-//
-//        SuccessResponse resp = respEntity.getBody();
-//
-//        Object obj = resp.getPayload();
-//
-//        UserDTO userDTO = modelMapper.map(obj, UserDTO.class);
-//
-//
-//        return new User(userDTO.getEmailAddress(), userDTO.getCountry(), new ArrayList<>());
-//    }
-//
     public UserDetails getUserById(Long id, String token) throws UsernameNotFoundException, JsonProcessingException {
         log.info("Id {}", id);
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
@@ -111,7 +100,6 @@ public class ClientService implements ClientServices, UserDetailsService {
         ResponseEntity<SuccessResponse> respEntity = restTemplate.exchange("http://localhost:8082/artisans/"+id, HttpMethod.GET, entity, SuccessResponse.class);
 
         SuccessResponse resp = respEntity.getBody();
-//
         log.info("Artisan {}", resp.getPayload());
 
         final ObjectMapper mapper = new ObjectMapper();
@@ -153,5 +141,18 @@ public class ClientService implements ClientServices, UserDetailsService {
             throw new CustomException(error);
         }
 
+    }
+
+    public ClientRequest removeClient(Long clientId) {
+        try {
+            Optional<Client> client = Optional.of(clientRepository.findById(clientId).get());
+            Client c = client.get();
+            clientRepository.delete(c);
+            return convertEntityToDto(client.get());
+
+        } catch (Exception exception) {
+            ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND.toString(), "No resource found");
+            throw new CustomException(error);
+        }
     }
 }

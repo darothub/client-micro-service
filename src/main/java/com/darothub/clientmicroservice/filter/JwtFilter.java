@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -34,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     public static String  token = null;
     public static String userName = null;
-    public static int userId = 0;
+    public static Long userId = 0L;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -58,38 +59,48 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
         }
-        catch (ExpiredJwtException e){
+        catch (Exception e){
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            ErrorResponse error = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.toString(), "JWT has expired");
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            ErrorResponse error = new ErrorResponse(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN.toString(), e.getMessage());
 
             final ObjectMapper mapper = new ObjectMapper();
             mapper.writeValue(response.getOutputStream(), error);
         }
 //
 //
-        if (0 != userId && null != userName && SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.info("token "+token + "\n" + "userId " + userId);
+        try{
+            if (0 != userId && null != userName && SecurityContextHolder.getContext().getAuthentication() == null) {
+                log.info("token "+token + "\n" + "userId " + userId);
 //            UserDetails userDetails = clientService.loadUserByUsername(String.valueOf(userId));
 //            UserDetails userDetails = clientService.getUserById(Long.valueOf(userId), token);
-            UserDetails userDetails = clientService.getUserById(Long.valueOf(userId), token);
-            log.info("UserDTO {}", userDetails);
-            if (jwtUtility.validateTokenTwo(token)) {
-                log.info("token is valid");
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
-                usernamePasswordAuthenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                UserDetails userDetails = clientService.getUserById(Long.valueOf(userId), token);
+                log.info("UserDTO {}", userDetails);
+                if (jwtUtility.validateTokenTwo(token)) {
+                    log.info("token is valid");
+                    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails, null, userDetails.getAuthorities()
+                            );
+                    usernamePasswordAuthenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }
+
             }
 
+            filterChain.doFilter(request, response);
+
+        }
+        catch (HttpClientErrorException e){
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(e.getRawStatusCode());
+            ErrorResponse error = new ErrorResponse(e.getRawStatusCode(), String.valueOf(e.getRawStatusCode()), e.getStatusCode());
+
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.writeValue(response.getOutputStream(), error);
         }
 
-
-
-        filterChain.doFilter(request, response);
     }
 }

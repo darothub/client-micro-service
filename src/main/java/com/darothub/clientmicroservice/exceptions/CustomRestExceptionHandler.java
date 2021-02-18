@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 @Slf4j
@@ -82,6 +81,14 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(TransactionSystemException.class)
     public ResponseEntity<Object> handleTransactionSystemException(TransactionSystemException ex) {
         getConstraintValidationErrors(ex);
+        return buildResponseEntity(error);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleTransactionAccessDeniedException(AccessDeniedException ex) {
+        error.setMessage(FORBIDDEN.toString());
+        error.setStatus(FORBIDDEN.value());
+        error.setError(ex.getMessage());
         return buildResponseEntity(error);
     }
 

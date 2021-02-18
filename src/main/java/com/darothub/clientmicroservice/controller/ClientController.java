@@ -50,7 +50,12 @@ public class ClientController {
     public ResponseEntity<ResponseModel> addClient(@Valid @RequestBody Client client, @RequestHeader("Authorization") String auth) {
         ClientRequest clientCreated = clientService.addClient(client, auth);
         return handleSuccessResponseEntity("Client added successfully", HttpStatus.CREATED, clientCreated);
+    }
 
+    @DeleteMapping("/clients/{id}")
+    public ResponseEntity<ResponseModel> removeClient(@PathVariable("id") Long clientId, @RequestHeader("Authorization") String auth) {
+        ClientRequest clientCreated = clientService.removeClient(clientId);
+        return handleSuccessResponseEntity("Client deleted successfully", HttpStatus.OK, clientCreated);
     }
 
     //
